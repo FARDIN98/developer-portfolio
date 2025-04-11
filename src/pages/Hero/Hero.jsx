@@ -183,9 +183,7 @@ const profile = {
                 <button
                   onClick={() => {
                     const link = document.createElement('a');
-                    // Use import.meta.env.BASE_URL to ensure the path works in both dev and production
-                    const resumePath = `${import.meta.env.BASE_URL}Fardin_resume.pdf`;
-                    link.href = resumePath;
+                    link.href = '/src/assets/Fardin_resume.pdf';
                     link.download = 'Fardin_resume.pdf';
                     document.body.appendChild(link);
                     link.click();
