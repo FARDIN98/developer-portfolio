@@ -40,7 +40,7 @@ export default function About() {
                   <p className="text-white">
                     I&apos;m a lifelong learner and innovator, driven by a desire to
                     contribute to the developer community with new ideas and
-                    tools that deliver real value. I&apos;m pushing the boundaries of JavaScript frameworks to
+                    tools that deliver real value. I&apos;m pushing the boundaries of JavaScript frameworks to explore
                     all development fields.
                   </p>
 

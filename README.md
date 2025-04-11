@@ -17,7 +17,7 @@ Welcome to my **portfolio website**! This site showcases my skills, experience, 
 
 ## Demo
 
-![Portfolio Demo](https://i.postimg.cc/Dfr5jCQp/Screenshot-2025-01-02-120901.png)
+![Portfolio Demo](https://i.postimg.cc/RVhjrcbK/Screenshot-2025-04-12-at-4-15-19-AM.png)
 
 ---
 
@@ -106,8 +106,7 @@ portfolio/
 The portfolio website consists of the following sections:
 
 - **Home**: Introduction and a brief overview.
-- **Skills**: A detailed list of my technical skills.
-- **Experience**: My professional journey and work experience.
+- **Skills**: A detailed list of my technical skills.<!-- - **Experience**: My professional journey and work experience. -->
 - **Education**: Academic background and certifications.
 - **Projects**: A showcase of the projects I've worked on.
 - **Contact**: Information on how to reach out to me.
@@ -151,7 +150,7 @@ You will need to download **Git** and **Node** to run this project.
 2. After forking, open your terminal and run the following commands to clone the repo:
 
   ```bash
-  git clone https://github.com/seraprogrammer/portfolio.git
+  git clone https://github.com/FARDIN98/developer-portfolio.git
   ```
 Navigate to the Project Directory 📂
 Once the repository is cloned, change your directory to the project folder:
@@ -179,15 +178,15 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-### 🤝 Contributing
+<!-- ### 🤝 Contributing
 
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
 3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+5. Open a Pull Request -->
 
----
 
-<div align="center"> Made with ❤️ by Nazmul Hossain </div>
+
+<div align="center"> Made with ❤️ by Fardin Ahamad </div>
 

@@ -5,44 +5,37 @@ import PropTypes from "prop-types";
 
 const projects = [
   {
-    title: "Olova! A Lightweight JavaScript Library",
+    title: "🚀 AI-Powered Mock Interview Platform",
     description:
-      "A lightweight JavaScript library for creating beautiful, responsive UI components.",
+      "🚀 Ai-powered mock interview platorm to practice interview using Gemini AI.",
     src: "rock.jpg",
-    link: "https://i.postimg.cc/DwgWTfP0/Annotation-2025-03-19-113338.png",
+    link: "https://i.postimg.cc/J0zrDHYC/Screenshot-2025-04-12-at-3-10-12-AM.png",
     color: "#5196fd",
-    githubLink: "https://github.com/olovajs/olova",
-    liveLink: "https://olova.js.org/",
+    technologies: ["Next JS,", " Typescript,", " Firebase,", " Tailwind CSS,", " Vapi AI,", " Google Gemini,", " Shad CN,", " Zod"],
+    githubLink: "https://github.com/FARDIN98/ai-mock-interview",
+    liveLink: "https://ai-mock-interview-pied-five.vercel.app/",
   },
   {
-    title: "A sleek portfolio built with React and Tailwind CSS ",
+    title: "Gsports 🔥",
     description:
-      "A sleek portfolio built with React and Tailwind CSS to showcase your skills, projects, and experience in a modern design.",
+      "Sports center booking platform from anywhere & anytime 🔥.",
     src: "tree.jpg",
-    link: "https://i.postimg.cc/J75CKyrs/Annotation-2025-04-01-203959.png",
+    link: "https://i.postimg.cc/XqmRjrT8/gsports1.png",
     color: "#8f89ff",
-    githubLink: "https://github.com/seraprogrammer/portfolio",
-    liveLink: "https://codervai.vercel.app",
+    technologies: ["Next JS,", " Typescript,", " Tailwind CSS,", " Shad CN,", " Supabase,", " React Hook Form,", " Zod"],
+    githubLink: "https://github.com/FARDIN98/gsports",
+    liveLink: "https://gsports1.netlify.app/",
   },
   {
-    title: "🚀 CodeWhisperer",
+    title: "🚀 Movix",
     description:
-      "🚀 CodeWhisperer A powerful online code editor built with React and Tailwind CSS. Featuring real-time code execution, syntax highlighting, multi-language support, and a sleek UI. Start coding instantly! 💻✨",
+      "🚀 A dynamic web app provided detailed information about movie & tv series. 💻✨",
     src: "water.jpg",
-    link: "https://i.postimg.cc/J4jPVFY0/Annotation-2025-04-01-204723.png",
+    link: "https://i.postimg.cc/zGVkwdHV/Screenshot-2025-04-12-at-3-27-06-AM.png",
     color: "#fff",
-    githubLink: "https://github.com/seraprogrammer/codewhisperer",
-    liveLink: "https://codewhisperer.vercel.app/",
-  },
-  {
-    title: "CodeKori 🔥",
-    description:
-      "CodeKori is a powerful online code editor built with React and Tailwind CSS. Featuring real-time code execution, syntax highlighting, multi-language support, and a sleek UI. Start coding instantly! 💻✨",
-    src: "house.jpg",
-    link: "https://i.postimg.cc/cHQr4fpR/Annotation-2025-04-01-205350.png",
-    color: "#ed649e",
-    githubLink: "https://github.com/seraprogrammer/CodeKori",
-    liveLink: "https://codekori.js.org",
+    technologies: ["React JS,", " Redux Toolkit,", " React Router,", " TMDb API,", " Axios,", " CSS Modules"],
+    githubLink: "https://github.com/FARDIN98/movix",
+    liveLink: "https://movix-sites.vercel.app/",
   },
 ];
 
@@ -70,6 +63,7 @@ export default function Projects() {
                 progress={scrollYProgress}
                 range={[i * 0.25, 1]}
                 targetScale={targetScale}
+                technologies={project.technologies}
                 githubLink={project.githubLink}
                 liveLink={project.liveLink}
               />
@@ -90,6 +84,7 @@ function Card({
   progress,
   range,
   targetScale,
+  technologies,
   githubLink,
   liveLink,
 }) {
@@ -135,9 +130,9 @@ function Card({
             />
 
             {/* Project number */}
-            <div className="absolute top-4 left-4 md:top-6 md:left-6 bg-black/50 backdrop-blur-md text-white px-3 py-1 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium">
+            {/* <div className="absolute top-4 left-4 md:top-6 md:left-6 bg-black/50 backdrop-blur-md text-white px-3 py-1 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium">
               Project {i + 1}
-            </div>
+            </div> */}
           </div>
 
           {/* Content section - full width on mobile, 45% on desktop */}
@@ -157,6 +152,13 @@ function Card({
               <p className="text-sm md:text-base text-gray-400 leading-relaxed line-clamp-3 md:line-clamp-none max-w-md">
                 {description}
               </p>
+            </div>
+
+            {/* Technologies used */}
+            <div className="flex flex-wrap gap-2 mt-4 md:mt-6">
+              <span className="px-1 py-1 text-md rounded text-blue-300">
+                <span className="text-xl font-semibold text-white">Technologies: </span>{technologies}
+              </span>
             </div>
 
             <div className="mt-4 md:mt-auto pt-4">
@@ -245,4 +247,5 @@ Card.propTypes = {
   targetScale: PropTypes.number.isRequired,
   githubLink: PropTypes.string.isRequired,
   liveLink: PropTypes.string.isRequired,
+  technologies: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
