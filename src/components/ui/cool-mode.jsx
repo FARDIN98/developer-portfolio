@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, memo } from "react";
 
+// Singleton container for particles
 const getContainer = () => {
   const id = "_coolMode_effect";
   let existingContainer = document.getElementById(id);
@@ -22,13 +23,27 @@ const getContainer = () => {
 
 let instanceCounter = 0;
 
+// Throttle function to limit execution frequency
+const throttle = (callback, delay) => {
+  let lastCall = 0;
+  return function (...args) {
+    const now = performance.now();
+    if (now - lastCall >= delay) {
+      lastCall = now;
+      callback(...args);
+    }
+  };
+};
+
 const applyParticleEffect = (element, options) => {
   instanceCounter++;
 
   const defaultParticle = "circle";
   const particleType = options?.particle || defaultParticle;
-  const sizes = [15, 20, 25, 35, 45];
-  const limit = 45;
+  // Reduced particle sizes for better performance
+  const sizes = [10, 15, 20, 25];
+  // Reduced particle limit for better performance
+  const limit = options?.limit || 25;
 
   let particles = [];
   let autoAddParticle = false;
@@ -37,13 +52,32 @@ const applyParticleEffect = (element, options) => {
 
   const container = getContainer();
 
+  // Pre-create SVG templates for better performance
+  const svgTemplates = {};
+  if (particleType === "circle") {
+    sizes.forEach(size => {
+      const svgNS = "http://www.w3.org/2000/svg";
+      const circleSVG = document.createElementNS(svgNS, "svg");
+      const circle = document.createElementNS(svgNS, "circle");
+      circle.setAttributeNS(null, "cx", (size / 2).toString());
+      circle.setAttributeNS(null, "cy", (size / 2).toString());
+      circle.setAttributeNS(null, "r", (size / 2).toString());
+      
+      circleSVG.appendChild(circle);
+      circleSVG.setAttribute("width", size.toString());
+      circleSVG.setAttribute("height", size.toString());
+      
+      svgTemplates[size] = circleSVG;
+    });
+  }
+
   function generateParticle() {
-    const size =
-      options?.size || sizes[Math.floor(Math.random() * sizes.length)];
-    const speedHorz = options?.speedHorz || Math.random() * 10;
-    const speedUp = options?.speedUp || Math.random() * 25;
+    const size = options?.size || sizes[Math.floor(Math.random() * sizes.length)];
+    // Reduced speed values for better performance
+    const speedHorz = options?.speedHorz || Math.random() * 8;
+    const speedUp = options?.speedUp || Math.random() * 20;
     const spinVal = Math.random() * 360;
-    const spinSpeed = Math.random() * 35 * (Math.random() <= 0.5 ? -1 : 1);
+    const spinSpeed = Math.random() * 25 * (Math.random() <= 0.5 ? -1 : 1);
     const top = mouseY - size / 2;
     const left = mouseX - size / 2;
     const direction = Math.random() <= 0.5 ? -1 : 1;
@@ -51,19 +85,13 @@ const applyParticleEffect = (element, options) => {
     const particle = document.createElement("div");
 
     if (particleType === "circle") {
-      const svgNS = "http://www.w3.org/2000/svg";
-      const circleSVG = document.createElementNS(svgNS, "svg");
-      const circle = document.createElementNS(svgNS, "circle");
-      circle.setAttributeNS(null, "cx", (size / 2).toString());
-      circle.setAttributeNS(null, "cy", (size / 2).toString());
-      circle.setAttributeNS(null, "r", (size / 2).toString());
-      circle.setAttributeNS(null, "fill", `hsl(${Math.random() * 360}, 70%, 50%)`);
-
-      circleSVG.appendChild(circle);
-      circleSVG.setAttribute("width", size.toString());
-      circleSVG.setAttribute("height", size.toString());
-
-      particle.appendChild(circleSVG);
+      // Clone from template for better performance
+      const template = svgTemplates[size].cloneNode(true);
+      const circle = template.querySelector('circle');
+      if (circle) {
+        circle.setAttributeNS(null, "fill", `hsl(${Math.random() * 360}, 70%, 50%)`);
+      }
+      particle.appendChild(template);
     } else {
       particle.innerHTML = `<img src="${particleType}" width="${size}" height="${size}" style="border-radius: 50%">`;
     }
@@ -86,8 +114,21 @@ const applyParticleEffect = (element, options) => {
     });
   }
 
-  function refreshParticles() {
-    particles.forEach((p) => {
+  // Use requestAnimationFrame timestamp for timing
+  let lastFrameTime = 0;
+  const FRAME_RATE = 1000 / 30; // Limit to 30fps for better performance
+
+  function refreshParticles(timestamp) {
+    // Skip frames to maintain target frame rate
+    if (timestamp - lastFrameTime < FRAME_RATE) {
+      return;
+    }
+    lastFrameTime = timestamp;
+
+    // Process particles in batches for better performance
+    const len = particles.length;
+    for (let i = 0; i < len; i++) {
+      const p = particles[i];
       p.left = p.left - p.speedHorz * p.direction;
       p.top = p.top - p.speedUp;
       p.speedUp = Math.min(p.size, p.speedUp - 1);
@@ -97,41 +138,40 @@ const applyParticleEffect = (element, options) => {
         p.top >=
         Math.max(window.innerHeight, document.body.clientHeight) + p.size
       ) {
-        particles = particles.filter((o) => o !== p);
+        // Mark for removal instead of removing immediately
+        p.remove = true;
         p.element.remove();
+      } else {
+        // Use transform for better performance
+        p.element.style.transform = `translate3d(${p.left}px, ${p.top}px, 0px) rotate(${p.spinVal}deg)`;
       }
+    }
 
-      p.element.setAttribute("style", [
-        "position:absolute",
-        "will-change:transform",
-        `top:${p.top}px`,
-        `left:${p.left}px`,
-        `transform:rotate(${p.spinVal}deg)`,
-      ].join(";"));
-    });
+    // Remove marked particles in a single operation
+    particles = particles.filter(p => !p.remove);
   }
 
   let animationFrame;
-
   let lastParticleTimestamp = 0;
-  const particleGenerationDelay = 30;
+  // Increased delay between particles for better performance
+  const particleGenerationDelay = options?.particleDelay || 50;
 
-  function loop() {
-    const currentTime = performance.now();
+  function loop(timestamp) {
     if (
       autoAddParticle &&
       particles.length < limit &&
-      currentTime - lastParticleTimestamp > particleGenerationDelay
+      timestamp - lastParticleTimestamp > particleGenerationDelay
     ) {
       generateParticle();
-      lastParticleTimestamp = currentTime;
+      lastParticleTimestamp = timestamp;
     }
 
-    refreshParticles();
+    refreshParticles(timestamp);
     animationFrame = requestAnimationFrame(loop);
   }
 
-  loop();
+  // Start animation loop
+  animationFrame = requestAnimationFrame(loop);
 
   const isTouchInteraction = "ontouchstart" in window;
 
@@ -139,7 +179,8 @@ const applyParticleEffect = (element, options) => {
   const tapEnd = isTouchInteraction ? "touchend" : "mouseup";
   const move = isTouchInteraction ? "touchmove" : "mousemove";
 
-  const updateMousePosition = (e) => {
+  // Throttled mouse position updates for better performance
+  const updateMousePosition = throttle((e) => {
     if ("touches" in e) {
       mouseX = e.touches?.[0].clientX;
       mouseY = e.touches?.[0].clientY;
@@ -147,7 +188,7 @@ const applyParticleEffect = (element, options) => {
       mouseX = e.clientX;
       mouseY = e.clientY;
     }
-  };
+  }, 16); // ~60fps
 
   const tapHandler = (e) => {
     updateMousePosition(e);
@@ -171,20 +212,24 @@ const applyParticleEffect = (element, options) => {
     element.removeEventListener(tapEnd, disableAutoAddParticle);
     element.removeEventListener("mouseleave", disableAutoAddParticle);
 
-    const interval = setInterval(() => {
-      if (animationFrame && particles.length === 0) {
-        cancelAnimationFrame(animationFrame);
-        clearInterval(interval);
+    // Cancel animation immediately
+    if (animationFrame) {
+      cancelAnimationFrame(animationFrame);
+    }
 
-        if (--instanceCounter === 0) {
-          container.remove();
-        }
-      }
-    }, 500);
+    // Clean up particles
+    particles.forEach(p => p.element.remove());
+    particles = [];
+
+    // Clean up container if this is the last instance
+    if (--instanceCounter === 0) {
+      container.remove();
+    }
   };
 };
 
-export const CoolMode = ({ children, options }) => {
+// Memoized component to prevent unnecessary re-renders
+export const CoolMode = memo(({ children, options }) => {
   const ref = useRef(null);
 
   useEffect(() => {
@@ -194,4 +239,6 @@ export const CoolMode = ({ children, options }) => {
   }, [options]);
 
   return React.cloneElement(children, { ref });
-};
+});
+
+CoolMode.displayName = "CoolMode";

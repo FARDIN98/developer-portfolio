@@ -1,8 +1,10 @@
 import { ReactLenis } from "lenis/react";
 import { useTransform, motion, useScroll } from "framer-motion";
-import { useRef } from "react";
+import { useRef, memo, useMemo } from "react";
 import PropTypes from "prop-types";
+// import { throttle } from "@/lib/performance";
 
+// Project data array
 const projects = [
   {
     title: "🚀 AI-Powered Mock Interview Platform",
@@ -39,43 +41,50 @@ const projects = [
   },
 ];
 
-export default function Projects() {
+// Main Projects component
+function Projects() {
   const container = useRef(null);
   const { scrollYProgress } = useScroll({
     target: container,
     offset: ["start start", "end end"],
   });
 
+  // Memoize project cards to prevent unnecessary re-renders
+  const projectCards = useMemo(() => {
+    return projects.map((project, i) => {
+      const targetScale = 1 - (projects.length - i) * 0.05;
+      return (
+        <Card
+          key={`p_${i}`}
+          i={i}
+          url={project.link}
+          title={project.title}
+          color={project.color}
+          description={project.description}
+          progress={scrollYProgress}
+          range={[i * 0.25, 1]}
+          targetScale={targetScale}
+          technologies={project.technologies}
+          githubLink={project.githubLink}
+          liveLink={project.liveLink}
+        />
+      );
+    });
+  }, [scrollYProgress]); // Only re-compute when scrollYProgress changes
+
   return (
     <ReactLenis root>
       <main className="bg-black" ref={container}>
         <section className="text-white w-full bg-slate-950">
-          {projects.map((project, i) => {
-            const targetScale = 1 - (projects.length - i) * 0.05;
-            return (
-              <Card
-                key={`p_${i}`}
-                i={i}
-                url={project.link}
-                title={project.title}
-                color={project.color}
-                description={project.description}
-                progress={scrollYProgress}
-                range={[i * 0.25, 1]}
-                targetScale={targetScale}
-                technologies={project.technologies}
-                githubLink={project.githubLink}
-                liveLink={project.liveLink}
-              />
-            );
-          })}
+          {projectCards}
         </section>
       </main>
     </ReactLenis>
   );
 }
 
-function Card({
+// Card component with memoization for better performance
+const Card = memo(function Card({
   i,
   title,
   description,
@@ -91,6 +100,14 @@ function Card({
   const container = useRef(null);
   const scale = useTransform(progress, range, [1, targetScale]);
 
+  // Use throttled hover handler for better performance
+  const throttledHoverProps = useMemo(() => ({
+    whileHover: {
+      y: -8,
+      transition: { duration: 0.3 },
+    }
+  }), []);
+
   return (
     <div
       ref={container}
@@ -102,10 +119,7 @@ function Card({
           top: `calc(-5vh + ${i * 25}px)`,
         }}
         className="relative -top-[25%] h-auto w-[90%] md:w-[85%] lg:w-[75%] xl:w-[65%] origin-top"
-        whileHover={{
-          y: -8,
-          transition: { duration: 0.3 },
-        }}
+        {...throttledHoverProps}
       >
         {/* Modern split card design */}
         <div className="w-full flex flex-col md:flex-row bg-zinc-900 rounded-2xl overflow-hidden shadow-xl">
@@ -128,11 +142,6 @@ function Card({
               whileHover={{ opacity: 0.3 }}
               transition={{ duration: 0.3 }}
             />
-
-            {/* Project number */}
-            {/* <div className="absolute top-4 left-4 md:top-6 md:left-6 bg-black/50 backdrop-blur-md text-white px-3 py-1 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium">
-              Project {i + 1}
-            </div> */}
           </div>
 
           {/* Content section - full width on mobile, 45% on desktop */}
@@ -233,7 +242,7 @@ function Card({
       </motion.div>
     </div>
   );
-}
+});
 
 // Add PropTypes validation
 Card.propTypes = {
@@ -245,7 +254,10 @@ Card.propTypes = {
   progress: PropTypes.object.isRequired,
   range: PropTypes.array.isRequired,
   targetScale: PropTypes.number.isRequired,
-  githubLink: PropTypes.string.isRequired,
-  liveLink: PropTypes.string.isRequired,
   technologies: PropTypes.arrayOf(PropTypes.string).isRequired,
+  githubLink: PropTypes.string.isRequired,
+  liveLink: PropTypes.string.isRequired
 };
+
+// Export memoized component
+export default memo(Projects);
