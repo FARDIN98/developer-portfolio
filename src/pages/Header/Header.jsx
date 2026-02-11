@@ -30,12 +30,12 @@ export default function Header() {
   const navLinks = [
     { id: "home", icon: FaHome, text: "Home", path: "/" },
     { id: "skills", icon: FaCode, text: "Skills", path: "/skills" },
-    // {
-    //   id: "experience",
-    //   icon: FaBriefcase,
-    //   text: "Experience",
-    //   path: "/experience",
-    // },
+    {
+      id: "experience",
+      icon: FaBriefcase,
+      text: "Experience",
+      path: "/experience",
+    },
     {
       id: "education",
       icon: FaGraduationCap,
