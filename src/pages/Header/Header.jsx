@@ -1,116 +1,112 @@
-/* eslint-disable no-unused-vars */
-import React, { useState, useEffect } from "react";
-import {
-  FaHome,
-  FaLaptopCode,
-  FaUser,
-  FaBriefcase,
-  FaGraduationCap,
-  FaCode,
-  FaEnvelope,
-  FaBars,
-} from "react-icons/fa";
-import { Link, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { Menu, X } from "lucide-react";
+import { RESUME_URL } from "@/lib/profile";
+
+const links = [
+  { id: "about", text: "About" },
+  { id: "experience", text: "Experience" },
+  { id: "projects", text: "Projects" },
+  { id: "skills", text: "Stack" },
+  { id: "education", text: "Education" },
+  { id: "contact", text: "Contact" },
+];
 
 export default function Header() {
-  const location = useLocation();
-  const [activeLink, setActiveLink] = useState(() => {
-    const path = location.pathname.substring(1) || "home";
-    return path;
-  });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [active, setActive] = useState("");
 
+  // Highlight the section that crosses the middle of the viewport.
   useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => e.isIntersecting && setActive(e.target.id)),
+      { rootMargin: "-45% 0px -50% 0px" }
+    );
+    document.querySelectorAll("main section[id]").forEach((s) => io.observe(s));
+    return () => io.disconnect();
   }, []);
 
-  const navLinks = [
-    { id: "home", icon: FaHome, text: "Home", path: "/" },
-    { id: "skills", icon: FaCode, text: "Skills", path: "/skills" },
-    {
-      id: "experience",
-      icon: FaBriefcase,
-      text: "Experience",
-      path: "/experience",
-    },
-    {
-      id: "education",
-      icon: FaGraduationCap,
-      text: "Education",
-      path: "/education",
-    },
-    { id: "projects", icon: FaLaptopCode, text: "Projects", path: "/projects" },
-    { id: "contact", icon: FaEnvelope, text: "Contact", path: "/contact" },
-  ];
-
   return (
-    <header className="fixed top-0 left-0 w-full z-50 bg-gray-900/95 backdrop-blur-md md:bg-transparent md:backdrop-blur-none">
-      <div className="md:fixed md:top-4 md:left-1/2 md:transform md:-translate-x-1/2 w-full md:w-auto">
-        <div className="p-[2px] md:rounded-full bg-gradient-to-r from-emerald-400 via-cyan-500 to-indigo-500 animate-gradient-x">
-          <nav className="bg-gray-900/90 backdrop-blur-md md:rounded-full px-4 md:px-6 py-2.5">
-            {/* Mobile Menu Button */}
-            <div className="flex justify-between items-center md:hidden px-2">
-              <Link to="/" className="text-white font-bold">Portfolio</Link>
-              <button 
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="text-white p-2"
+    <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4">
+      <nav
+        aria-label="Primary"
+        className="mx-auto flex max-w-6xl items-center justify-between rounded-full border border-white/10 bg-zinc-950/70 py-2 pl-5 pr-2 shadow-lg shadow-black/20 backdrop-blur-xl"
+      >
+        <a href="#home" className="font-mono text-sm font-medium text-white">
+          fardin<span className="text-emerald-400">.dev</span>
+        </a>
+
+        <ul className="hidden items-center gap-1 md:flex">
+          {links.map(({ id, text }) => (
+            <li key={id}>
+              <a
+                href={`#${id}`}
+                aria-current={active === id ? "true" : undefined}
+                className={`relative block rounded-full px-4 py-2 text-sm transition-colors ${
+                  active === id ? "text-white" : "text-zinc-400 hover:text-white"
+                }`}
               >
-                <FaBars />
-              </button>
-            </div>
+                {active === id && (
+                  <motion.span
+                    layoutId="nav-pill"
+                    className="absolute inset-0 -z-10 rounded-full bg-white/10"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
+                  />
+                )}
+                {text}
+              </a>
+            </li>
+          ))}
+        </ul>
 
-            {/* Navigation Links */}
-            <div className={`${isMenuOpen ? 'block' : 'hidden'} md:block`}>
-              <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-1 lg:gap-2 py-4 md:py-0">
-                {navLinks.map(({ id, icon: Icon, text, path }) => (
-                  <Link
-                    key={id}
-                    to={path}
-                    onClick={() => {
-                      setActiveLink(id);
-                      setIsMenuOpen(false);
-                    }}
-                    className={`px-3 py-2 md:py-1.5 rounded-lg md:rounded-full text-sm font-medium
-                      transition-all duration-300 flex items-center gap-2
-                      hover:bg-white/10 
-                      ${
-                        activeLink === id
-                          ? "bg-white/15 text-white"
-                          : "text-gray-300 hover:text-white"
-                      }
-                    `}
-                  >
-                    <Icon
-                      className={`text-base ${
-                        activeLink === id ? "scale-110" : ""
-                      }`}
-                    />
-                    <span className="inline">{text}</span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </nav>
+        <div className="flex items-center gap-2">
+          <a
+            href={RESUME_URL}
+            download
+            className="hidden rounded-full bg-white px-4 py-2 text-sm font-medium text-zinc-950 transition-colors hover:bg-emerald-200 sm:inline-flex"
+          >
+            Résumé
+          </a>
+          <button
+            type="button"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-expanded={isMenuOpen}
+            aria-controls="mobile-nav"
+            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+            className="grid size-10 place-items-center rounded-full text-white hover:bg-white/10 md:hidden"
+          >
+            {isMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+          </button>
         </div>
-      </div>
+      </nav>
 
-      <style>{`
-        @keyframes gradient-x {
-          0%, 100% {
-            background-position: 0% 50%;
-          }
-          50% {
-            background-position: 100% 50%;
-          }
-        }
-        .animate-gradient-x {
-          animation: gradient-x 3s linear infinite;
-          background-size: 200% 200%;
-        }
-      `}</style>
+      {isMenuOpen && (
+        <ul
+          id="mobile-nav"
+          className="mx-auto mt-2 max-w-6xl space-y-1 rounded-2xl border border-white/10 bg-zinc-950/95 p-2 backdrop-blur-xl md:hidden"
+        >
+          {links.map(({ id, text }) => (
+            <li key={id}>
+              <a
+                href={`#${id}`}
+                onClick={() => setIsMenuOpen(false)}
+                className="block rounded-xl px-4 py-3 text-zinc-300 hover:bg-white/5 hover:text-white"
+              >
+                {text}
+              </a>
+            </li>
+          ))}
+          <li>
+            <a
+              href={RESUME_URL}
+              download
+              className="block rounded-xl px-4 py-3 font-medium text-emerald-300 hover:bg-white/5"
+            >
+              Download résumé
+            </a>
+          </li>
+        </ul>
+      )}
     </header>
   );
 }

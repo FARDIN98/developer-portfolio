@@ -1,250 +1,198 @@
-import { useState, useEffect } from "react";
-import Prism from "prismjs";
-import "prismjs/components/prism-javascript";
-import "@/assets/css/tomorrow.css";
-import Meteors from "@/components/ui/meteors";
-import PortfolioPage from "@/pages/About/About";
-import SparklesText from "@/components/ui/sparkles-text";
-import { FlipWords } from "@/components/ui/flip-words";
-import { FaDownload } from "react-icons/fa";
+/* eslint-disable react/prop-types */
+import { useEffect, useRef, useState } from "react";
+import { animate, motion, useInView, useReducedMotion } from "framer-motion";
+import { ArrowRight, Download, Github, Linkedin, Mail, MapPin } from "lucide-react";
+import { fadeUp } from "@/lib/utils";
+import { EMAIL, GITHUB, LINKEDIN, RESUME_URL } from "@/lib/profile";
 
-// Grid Background - Replacing the HexagonBackground
-const GridBackground = () => {
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
-      <div className="absolute inset-0 [mask-image:radial-gradient(ellipse_at_center,transparent_0%,black)]">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="100%"
-          height="100%"
-          className="absolute inset-0"
-        >
-          <pattern
-            id="grid"
-            width="40"
-            height="40"
-            patternUnits="userSpaceOnUse"
-          >
-            <rect
-              width="40"
-              height="40"
-              fill="none"
-              stroke="white"
-              strokeWidth="0.5"
-              className="opacity-40 animate-gridPulse"
-            />
-          </pattern>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-        </svg>
-      </div>
-    </div>
-  );
-};
+const layers = [
+  { label: "Mobile & web", stack: "React Native · Next.js", stat: "55K+ downloads" },
+  { label: "APIs", stack: "NestJS · Go", stat: "388 endpoints" },
+  { label: "Workers & AI", stack: "BullMQ · FastAPI", stat: "async jobs" },
+  { label: "Data", stack: "PostgreSQL · Redis", stat: "269K+ orders" },
+];
 
-export default function Hero() {
-  const words = [
-    "Front End Developer & UI/UX Enthusiast",
-    "JavaScript Developer",
-    "Learning LAMP Stack",
-    "Docker & Kubernetes for DevOps Enthusiast",
-  ];
+const stats = [
+  { value: 55, suffix: "K+", label: "Play Store downloads across apps I've shipped" },
+  { value: 269, suffix: "K+", label: "orders migrated in the Munchies rewrite" },
+  { value: 388, label: "API endpoints in a single Go rewrite" },
+  { value: 500, prefix: "~", label: "Playwright e2e tests behind that rewrite" },
+];
 
-  const [code] = useState(`
-const profile = {
-    name: 'Fardin Ahamad',
-    title: 'Front End Developer | Problem Solver',
-    skills: [
-        'React', 'NextJS', 'Redux', 'Typescript',
-        'MySQL', 'MongoDB', 'Tailwind CSS',
-        'Git', 'Supabase', 'Figma', 'Postman'
-    ],
-    hardWorker: true,
-    quickLearner: true,
-    problemSolver: true,
-    yearsOfExperience: 2, 
-    hireable: function() {
-        return (
-            this.hardWorker &&
-            this.problemSolver &&
-            this.skills.length >= 5 &&
-            this.yearsOfExperience >= 2
-        );
-    }
-};
-  `);
+const socials = [
+  { href: GITHUB, label: "GitHub", icon: Github },
+  { href: LINKEDIN, label: "LinkedIn", icon: Linkedin },
+  { href: `mailto:${EMAIL}`, label: "Email", icon: Mail },
+];
+
+function Counter({ value, prefix = "", suffix = "" }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true });
+  const reduce = useReducedMotion();
+  const [n, setN] = useState(reduce ? value : 0);
 
   useEffect(() => {
-    Prism.highlightAll();
-
-    // Add CSS animation for grid and dots
-    const style = document.createElement("style");
-    style.textContent = `
-      @keyframes gridPulse {
-        0%, 100% { opacity: 0.1; }
-        50% { opacity: 0.3; }
-      }
-      
-      @keyframes dotPulse {
-        0%, 100% { opacity: 0.2; transform: scale(0.8); }
-        50% { opacity: 0.5; transform: scale(1.2); }
-      }
-    `;
-    document.head.appendChild(style);
-
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, [code]);
+    if (!inView || reduce) return;
+    const controls = animate(0, value, {
+      duration: 1.6,
+      ease: "easeOut",
+      onUpdate: (v) => setN(Math.round(v)),
+    });
+    return () => controls.stop();
+  }, [inView, reduce, value]);
 
   return (
-    <>
-      <main className="pt-20 lg:pt-[0rem] bg-[#020617] text-white min-h-screen">
-        <section className="hero min-h-screen flex items-center relative px-4 sm:px-6 lg:px-8">
-          <div className="absolute inset-0"></div>
+    <span ref={ref} className="tabular-nums">
+      {prefix}
+      {n}
+      {suffix}
+    </span>
+  );
+}
 
-          {/* Choose one of these background options */}
-          <GridBackground />
+function StackTrace() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+      className="relative rounded-3xl border border-white/10 bg-zinc-950/70 p-5 shadow-[0_0_120px_-30px_rgba(52,211,153,0.45)] backdrop-blur-xl sm:p-6"
+    >
+      <div className="mb-6 flex items-center gap-2 font-mono text-xs text-zinc-500">
+        <span className="size-2.5 rounded-full bg-zinc-700" />
+        <span className="size-2.5 rounded-full bg-zinc-700" />
+        <span className="size-2.5 rounded-full bg-zinc-700" />
+        <span className="ml-2">~/fardin/request.trace</span>
+      </div>
 
-          {/* Or keep the original backgrounds if you prefer */}
-          {/* <HexagonBackground /> */}
-          {/* <AnimatedGrid /> */}
-          {/* <DotBackground /> */}
-
-          {/* Meteors Effect */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <Meteors number={10} />
-          </div>
-
-          {/* Main content container */}
-          <div className="container mx-auto flex flex-col lg:flex-row items-center justify-between relative z-10 py-12 lg:py-0">
-            {/* Left column - Text content */}
-            <div className="w-full lg:w-1/2 mb-12 lg:mb-0 animate__animated animate__fadeInLeft relative">
-              {/* Decorative blurs */}
-              <div className="absolute hidden lg:-top-20 lg:-left-20 lg:block w-48 h-48 lg:w-64 lg:h-64 bg-blue-500/10 rounded-full blur-3xl"></div>
-              <div className="absolute hidden lg:block lg:top-40 lg:-right-20 w-48 h-48 lg:w-64 lg:h-64 bg-teal-500/10 rounded-full blur-3xl"></div>
-
-              {/* Welcome badge */}
-              <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 mb-6 sm:mb-8 animate__animated animate__fadeInDown animate__delay-1s">
-                <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></div>
-                <span className="text-gray-300 text-xs sm:text-sm font-medium">
-                  Welcome to my universe
-                </span>
-              </div>
-
-              {/* Name section */}
-              <div className="relative mb-6 sm:mb-8">
-                <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold leading-tight">
-                  <SparklesText text="Hello" />
-                  <span className="relative inline-block">
-                    I&apos;m
-                    <span className="typing-effect gradient-text">
-                      {" "}
-                      Fardin Ahamad
-                    </span>
-                  </span>
-                </h1>
-                <div className="absolute -z-10 top-1/2 -translate-y-1/2 left-1/4 w-24 sm:w-32 h-24 sm:h-32 bg-blue-500/20 rounded-full blur-2xl animate-pulse"></div>
-              </div>
-
-              {/* Role badge */}
-              <div className="inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-2 sm:py-3 rounded-xl sm:rounded-2xl bg-gradient-to-r from-blue-500/10 to-teal-500/10 border border-blue-500/20 mb-6 sm:mb-8 backdrop-blur-sm animate__animated animate__fadeInUp animate__delay-1s">
-                <i className="fas fa-rocket text-blue-400 animate-bounce text-sm sm:text-base"></i>
-                <span>
-                  <FlipWords
-                    className={"text-lg sm:text-xl text-blue-400 font-medium"}
-                    words={words}
-                  />
-                </span>
-              </div>
-
-              {/* Description */}
-              <div className="relative mb-8 sm:mb-12 max-w-xl">
-                <p className="text-base sm:text-xl text-gray-300/90 leading-relaxed">
-                  JavaScript lover 🚀 | coding the future 💻✨
-                </p>
-              </div>
-
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 animate__animated animate__fadeInUp animate__delay-2s">
-                {/* View Projects Button */}
-                <a
-                  href="/projects"
-                  className="group relative inline-flex items-center justify-center gap-3 bg-gradient-to-r from-blue-500 to-teal-400 p-0.5 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-[0_0_2rem_-0.5rem_#60A5FA]"
-                >
-                  <span className="block w-full px-6 sm:px-8 py-3 sm:py-4 rounded-[11px] bg-gray-900 transition-all duration-300 group-hover:bg-gradient-to-r group-hover:from-blue-500 group-hover:to-teal-400">
-                    <span className="relative flex items-center justify-center gap-2 text-white font-medium">
-                      <span>My Projects</span>
-                      <i className="fas fa-arrow-right transform transition-all duration-300 group-hover:translate-x-1"></i>
-                    </span>
-                  </span>
-                </a>
-
-                {/* Resume Download Button */}
-                <a
-                  href="/Fardin_resume.pdf" // Direct reference to file in public folder
-                  download="Fardin_resume.pdf"
-                  className="group relative inline-flex items-center justify-center gap-3 p-0.5 rounded-xl bg-gradient-to-r from-gray-800 to-gray-700 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_2rem_-0.5rem_#60A5FA]"
-                >
-                  <span className="block w-full px-6 sm:px-8 py-3 sm:py-4 rounded-[11px] bg-gray-900 border border-gray-700/50 transition-all duration-300 group-hover:bg-gradient-to-r group-hover:from-gray-800 group-hover:to-gray-700">
-                    <span className="relative flex items-center justify-center gap-2 text-gray-300 font-medium group-hover:text-white">
-                      <span>Get Resume</span>
-                      <FaDownload />
-                    </span>
-                  </span>
-                </a>
-              </div>
-
-              {/* Floating badges */}
-              <div className="hidden lg:block absolute left-[5.5rem] top-[2.3rem] animate-float-slow">
-                <div className="px-4 py-2 rounded-lg bg-purple-500/10 backdrop-blur-sm border border-purple-500/20 text-purple-400">
-                  <i className="fas fa-wand-magic-sparkles"></i>&nbsp;&nbsp;UI
-                  Magic
-                </div>
-              </div>
-              <div className="hidden lg:block absolute right-10 top-20 animate-float">
-                <div className="px-4 py-2 rounded-lg bg-blue-500/10 backdrop-blur-sm border border-blue-500/20 text-blue-400">
-                  <i className="fas fa-code"></i>&nbsp;&nbsp;Clean Code
-                </div>
-              </div>
-              <div className="hidden lg:block absolute top-[17rem] left-[70%] transform -translate-x-1/2 animate-float">
-                <div className="px-4 py-2 rounded-lg bg-amber-500/10 backdrop-blur-sm border border-amber-500/20 text-amber-400">
-                  <i className="fas fa-lightbulb"></i>&nbsp;&nbsp;Innovation
-                </div>
-              </div>
-            </div>
-
-            {/* Right column - Code window */}
-            <div className="w-full lg:w-1/2 animate__animated animate__fadeInDown animate__delay-0.1s">
-              <div className="gradient-border">
-                <div className="code-window bg-[#091121]">
-                  <div className="window-header">
-                    <div className="window-dot bg-red-500"></div>
-                    <div className="window-dot bg-yellow-500"></div>
-                    <div className="window-dot bg-green-500"></div>
-                    <span className="ml-2 text-sm text-gray-400 flex items-center gap-2">
-                      <i className="fas fa-code"></i>
-                      Fardin.js
-                    </span>
-                  </div>
-                  <pre className="language-javascript">
-                    <code className="language-javascript">{code}</code>
-                  </pre>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce flex flex-col items-center gap-2">
-          <span className="text-gray-400 text-sm flex items-center gap-2">
-            <i className="fas fa-mouse text-blue-400"></i>
-            About me
-          </span>
-          <i className="fas fa-chevron-down text-blue-400 text-xl"></i>
+      <div className="relative pl-8">
+        {/* The rail a "request" travels down, from the client to the database */}
+        <div className="absolute bottom-6 left-3 top-6 w-px bg-gradient-to-b from-emerald-400/70 via-cyan-400/40 to-violet-400/70">
+          <span className="absolute -left-[3px] size-[7px] animate-trace rounded-full bg-emerald-200 shadow-[0_0_14px_3px_rgba(110,231,183,0.8)] motion-reduce:hidden" />
         </div>
-        <PortfolioPage />
-      </main>
-    </>
+
+        <ol className="space-y-3">
+          {layers.map((layer, i) => (
+            <motion.li
+              key={layer.label}
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 + i * 0.12 }}
+              className="relative flex items-center gap-4 rounded-2xl border border-white/[0.07] bg-white/[0.03] p-3 sm:p-4"
+            >
+              <span className="absolute -left-6 top-1/2 size-2 -translate-y-1/2 rounded-full border border-emerald-300/60 bg-zinc-950" />
+              <span className="grid size-9 shrink-0 place-items-center rounded-lg border border-white/10 bg-zinc-900 font-mono text-[11px] text-emerald-300">
+                0{i + 1}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-white">{layer.label}</p>
+                <p className="truncate font-mono text-xs text-zinc-500">{layer.stack}</p>
+              </div>
+              <span className="chip hidden shrink-0 sm:inline-flex">{layer.stat}</span>
+            </motion.li>
+          ))}
+        </ol>
+      </div>
+
+      <p className="mt-6 font-mono text-xs text-zinc-500">
+        <span className="text-emerald-400">✓</span> one engineer, every layer
+      </p>
+    </motion.div>
+  );
+}
+
+export default function Hero() {
+  return (
+    <section id="home" className="relative isolate overflow-hidden pb-20 pt-32 md:pt-40">
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.09)_1px,transparent_1px)] [background-size:26px_26px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_30%,black,transparent)]" />
+        <div className="absolute -top-48 left-[5%] h-[34rem] w-[34rem] animate-aurora rounded-full bg-emerald-500/20 blur-[120px]" />
+        <div className="absolute right-[-10%] top-24 h-[30rem] w-[30rem] animate-aurora rounded-full bg-violet-600/20 blur-[120px] [animation-delay:-9s]" />
+      </div>
+
+      <div className="mx-auto grid max-w-6xl items-center gap-14 px-4 sm:px-6 lg:grid-cols-[1.15fr_0.85fr]">
+        <div>
+          <motion.p
+            {...fadeUp()}
+            className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/[0.07] px-3 py-1.5 font-mono text-xs text-emerald-200"
+          >
+            <span className="relative flex size-2">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75 motion-reduce:hidden" />
+              <span className="relative inline-flex size-2 rounded-full bg-emerald-400" />
+            </span>
+            Full Stack Software Developer @ Cookspace
+          </motion.p>
+
+          <motion.h1
+            {...fadeUp(0.1)}
+            className="mt-7 text-5xl font-semibold leading-[1.02] tracking-tight text-white sm:text-6xl lg:text-7xl"
+          >
+            I build products <em className="text-gradient font-serif font-normal italic">end to end.</em>
+          </motion.h1>
+
+          <motion.p {...fadeUp(0.2)} className="mt-7 max-w-xl text-lg leading-relaxed text-zinc-400">
+            Hi, I&apos;m <span className="text-white">Fardin Ehsan Ahamad</span> — a full-stack engineer
+            shipping React Native apps, Next.js dashboards and the Go &amp; NestJS APIs, queues and
+            PostgreSQL behind them.
+          </motion.p>
+
+          <motion.div {...fadeUp(0.3)} className="mt-9 flex flex-wrap items-center gap-3">
+            <a
+              href="#projects"
+              className="group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-medium text-zinc-950 transition-colors hover:bg-emerald-200"
+            >
+              See my work
+              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+            </a>
+            <a
+              href={RESUME_URL}
+              download
+              className="inline-flex items-center gap-2 rounded-full border border-white/15 px-6 py-3 text-sm font-medium text-white transition-colors hover:border-white/40 hover:bg-white/5"
+            >
+              <Download className="size-4" />
+              Download résumé
+            </a>
+          </motion.div>
+
+          <motion.div {...fadeUp(0.4)} className="mt-10 flex items-center gap-5 text-zinc-500">
+            {socials.map(({ href, label, icon: Icon }) => (
+              <a
+                key={label}
+                href={href}
+                target={href.startsWith("http") ? "_blank" : undefined}
+                rel="noopener noreferrer"
+                aria-label={label}
+                className="transition-colors hover:text-white"
+              >
+                <Icon className="size-5" />
+              </a>
+            ))}
+            <span className="h-4 w-px bg-white/10" />
+            <span className="inline-flex items-center gap-1.5 text-sm">
+              <MapPin className="size-4" /> Dhaka, Bangladesh
+            </span>
+          </motion.div>
+        </div>
+
+        <StackTrace />
+      </div>
+
+      <div className="mx-auto mt-24 max-w-6xl px-4 sm:px-6">
+        <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.08] lg:grid-cols-4">
+          {stats.map((s, i) => (
+            <motion.div
+              key={s.label}
+              {...fadeUp(i * 0.08)}
+              className="flex flex-col-reverse bg-[#07080b] p-5 sm:p-6 md:p-8"
+            >
+              <dt className="mt-2 text-sm text-zinc-500">{s.label}</dt>
+              <dd className="text-gradient text-4xl font-semibold tracking-tight md:text-5xl">
+                <Counter value={s.value} prefix={s.prefix} suffix={s.suffix} />
+              </dd>
+            </motion.div>
+          ))}
+        </dl>
+      </div>
+    </section>
   );
 }

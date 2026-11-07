@@ -1,263 +1,173 @@
-import { ReactLenis } from "lenis/react";
-import { useTransform, motion, useScroll } from "framer-motion";
-import { useRef, memo, useMemo } from "react";
-import PropTypes from "prop-types";
-// import { throttle } from "@/lib/performance";
+import { motion } from "framer-motion";
+import { ArrowUpRight, Github } from "lucide-react";
+import SectionHeader from "@/components/SectionHeader";
+import { fadeUp, trackPointer } from "@/lib/utils";
 
-// Project data array
-const projects = [
+// Production work: no public links, so each card leads with its headline number.
+const systems = [
   {
-    title: "🚀 AI-Powered Mock Interview Platform",
+    title: "Munchies platform rewrite",
+    kicker: "Parse/MongoDB → Go + PostgreSQL",
+    stat: "269K+",
+    statLabel: "orders migrated",
+    body: "388 API endpoints, a 100-page React admin and a Next.js storefront. A Python ETL moved 480K+ order items and 44K+ bKash payments, backed by 332 Go test files and ~500 Playwright e2e tests.",
+    tags: ["Go", "PostgreSQL", "Supabase", "Python ETL", "Playwright"],
+    className: "md:col-span-2",
+  },
+  {
+    title: "In-house address search",
+    kicker: "Replaced a paid geocoding API",
+    stat: "38% → 90%",
+    statLabel: "address match rate",
+    body: "Search over OpenStreetMap data with PostGIS and pg_trgm across 139K places, fronted by a Redis cache.",
+    tags: ["PostGIS", "pg_trgm", "Redis"],
+  },
+  {
+    title: "MatchBD",
+    kicker: "Matrimony app · 4.5★ on Google Play",
+    stat: "41",
+    statLabel: "app screens, primary engineer",
+    body: "Live chat on Supabase Realtime, Nagad payments end to end, and refresh-token rotation with replay detection on a 347-endpoint NestJS API.",
+    tags: ["React Native", "NestJS", "Supabase"],
+  },
+  {
+    title: "Kindred",
+    kicker: "AI matchmaking app",
+    stat: "52",
+    statLabel: "app screens, bootstrapped",
+    body: "NID + selfie KYC and Big Five onboarding, a trust-and-safety system across app, API and admin, and tooling for its AI compatibility jobs.",
+    tags: ["Expo", "NestJS", "BullMQ", "FastAPI"],
+  },
+  {
+    title: "MCP server for AI agents",
+    kicker: "Developer tooling",
+    stat: "16",
+    statLabel: "tools for coding agents",
+    body: "Lets AI coding agents query staging logs, deploys, queues and LLM usage — paired with an 11-suite e2e harness that gates every PR.",
+    tags: ["MCP", "Observability", "CI"],
+  },
+];
+
+const sideProjects = [
+  {
+    title: "Prepwise",
     description:
-      "🚀 Ai-powered mock interview platorm to practice interview using Gemini AI.",
-    src: "rock.jpg",
-    link: "https://i.postimg.cc/J0zrDHYC/Screenshot-2025-04-12-at-3-10-12-AM.png",
-    color: "#5196fd",
-    technologies: ["Next JS,", " Typescript,", " Firebase,", " Tailwind CSS,", " Vapi AI,", " Google Gemini,", " Shad CN,", " Zod"],
+      "Real-time voice AI interviewer (Vapi + Google Gemini) that runs role-specific mock interviews and gives structured feedback.",
+    image: "https://i.postimg.cc/J0zrDHYC/Screenshot-2025-04-12-at-3-10-12-AM.png",
+    tags: ["Next.js", "TypeScript", "Firebase", "Vapi", "Gemini"],
     githubLink: "https://github.com/FARDIN98/ai-mock-interview",
     liveLink: "https://ai-mock-interview-pied-five.vercel.app/",
   },
   {
-    title: "Converso 🔥",
+    title: "Converso",
     description:
-      "AI powered LMS SAAS app with robust features 🔥.",
-    src: "tree.jpg",
-    link: "https://i.postimg.cc/L8Kq1DQy/converso.png",
-    color: "#00FFFF",
-    technologies: ["Next JS,", " Typescript,", " Clerk,", " Shad CN,", " Supabase,", " Sentry,", " Vitest"],
+      "AI-powered LMS SaaS app with Clerk auth, a Supabase data layer, Sentry monitoring and Vitest coverage.",
+    image: "https://i.postimg.cc/L8Kq1DQy/converso.png",
+    tags: ["Next.js", "TypeScript", "Clerk", "Supabase", "Sentry"],
     githubLink: "https://github.com/FARDIN98/converso",
     liveLink: "https://converso-pearl.vercel.app/",
   },
   {
-    title: "🚀 Movix",
+    title: "Movix",
     description:
-      "🚀 A dynamic web app provided detailed information about movie & tv series. 💻✨",
-    src: "water.jpg",
-    link: "https://i.postimg.cc/zGVkwdHV/Screenshot-2025-04-12-at-3-27-06-AM.png",
-    color: "#8f89ff",
-    technologies: ["React JS,", " Redux Toolkit,", " React Router,", " TMDb API,", " Axios,", " CSS Modules"],
+      "Movie and TV discovery app with search by title, genre and keyword, plus cast, crew, ratings and release details from TMDb.",
+    image: "https://i.postimg.cc/zGVkwdHV/Screenshot-2025-04-12-at-3-27-06-AM.png",
+    tags: ["React", "Redux Toolkit", "React Router", "TMDb API"],
     githubLink: "https://github.com/FARDIN98/movix",
     liveLink: "https://movix-sites.vercel.app/",
   },
 ];
 
-// Main Projects component
-function Projects() {
-  const container = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: container,
-    offset: ["start start", "end end"],
-  });
-
-  // Memoize project cards to prevent unnecessary re-renders
-  const projectCards = useMemo(() => {
-    return projects.map((project, i) => {
-      const targetScale = 1 - (projects.length - i) * 0.05;
-      return (
-        <Card
-          key={`p_${i}`}
-          i={i}
-          url={project.link}
-          title={project.title}
-          color={project.color}
-          description={project.description}
-          progress={scrollYProgress}
-          range={[i * 0.25, 1]}
-          targetScale={targetScale}
-          technologies={project.technologies}
-          githubLink={project.githubLink}
-          liveLink={project.liveLink}
-        />
-      );
-    });
-  }, [scrollYProgress]); // Only re-compute when scrollYProgress changes
-
+export default function Projects() {
   return (
-    <ReactLenis root>
-      <main className="bg-black" ref={container}>
-        <section className="text-white w-full bg-slate-950">
-          {projectCards}
-        </section>
-      </main>
-    </ReactLenis>
+    <section id="projects" className="relative py-24 md:py-32">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <SectionHeader
+          index="03"
+          label="Projects"
+          intro="Production systems I've built at work, then a few things I've shipped on my own."
+        >
+          Selected <em>work.</em>
+        </SectionHeader>
+
+        <div className="mt-16 grid gap-4 md:grid-cols-3">
+          {systems.map((s, i) => (
+            <motion.article
+              key={s.title}
+              {...fadeUp((i % 3) * 0.08)}
+              onMouseMove={trackPointer}
+              className={`panel spotlight flex flex-col p-6 md:p-8 ${s.className ?? ""}`}
+            >
+              <p className="font-mono text-xs text-zinc-500">{s.kicker}</p>
+              <h3 className="mt-2 text-xl font-semibold text-white">{s.title}</h3>
+              <p className="mt-6 text-gradient text-4xl font-semibold tracking-tight md:text-5xl">{s.stat}</p>
+              <p className="mt-1 text-sm text-zinc-500">{s.statLabel}</p>
+              <p className="mt-6 flex-1 leading-relaxed text-zinc-400">{s.body}</p>
+              <ul className="mt-6 flex flex-wrap gap-2" aria-label="Tech used">
+                {s.tags.map((t) => (
+                  <li key={t} className="chip">
+                    {t}
+                  </li>
+                ))}
+              </ul>
+            </motion.article>
+          ))}
+        </div>
+
+        <motion.h3 {...fadeUp()} className="mt-24 font-mono text-sm uppercase tracking-[0.2em] text-zinc-500">
+          Side projects
+        </motion.h3>
+        <div className="mt-6 grid gap-6 md:grid-cols-3">
+          {sideProjects.map((p, i) => (
+            <motion.article
+              key={p.title}
+              {...fadeUp(i * 0.08)}
+              className="panel group flex flex-col"
+            >
+              <div className="relative aspect-video overflow-hidden border-b border-white/[0.08]">
+                <img
+                  src={p.image}
+                  alt={`Screenshot of ${p.title}`}
+                  loading="lazy"
+                  className="size-full object-cover object-top transition duration-700 group-hover:scale-105"
+                />
+                <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#07080b]/70 to-transparent" />
+              </div>
+              <div className="flex flex-1 flex-col p-6">
+                <h4 className="text-lg font-semibold text-white">{p.title}</h4>
+                <p className="mt-2 flex-1 text-sm leading-relaxed text-zinc-400">{p.description}</p>
+                <ul className="mt-5 flex flex-wrap gap-2" aria-label="Tech used">
+                  {p.tags.map((t) => (
+                    <li key={t} className="chip">
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-6 flex items-center gap-5 border-t border-white/[0.06] pt-5 text-sm">
+                  <a
+                    href={p.liveLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 font-medium text-emerald-300 hover:text-emerald-200"
+                  >
+                    Live site <ArrowUpRight className="size-4" />
+                    <span className="sr-only">for {p.title}</span>
+                  </a>
+                  <a
+                    href={p.githubLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-zinc-400 hover:text-white"
+                  >
+                    <Github className="size-4" /> Code
+                    <span className="sr-only">for {p.title}</span>
+                  </a>
+                </div>
+              </div>
+            </motion.article>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
-
-// Card component with memoization for better performance
-const Card = memo(function Card({
-  i,
-  title,
-  description,
-  url,
-  color,
-  progress,
-  range,
-  targetScale,
-  technologies,
-  githubLink,
-  liveLink,
-}) {
-  const container = useRef(null);
-  const scale = useTransform(progress, range, [1, targetScale]);
-
-  // Use throttled hover handler for better performance
-  const throttledHoverProps = useMemo(() => ({
-    whileHover: {
-      y: -8,
-      transition: { duration: 0.3 },
-    }
-  }), []);
-
-  return (
-    <div
-      ref={container}
-      className="h-screen flex items-center justify-center sticky top-0"
-    >
-      <motion.div
-        style={{
-          scale,
-          top: `calc(-5vh + ${i * 25}px)`,
-        }}
-        className="relative -top-[25%] h-auto w-[90%] md:w-[85%] lg:w-[75%] xl:w-[65%] origin-top"
-        {...throttledHoverProps}
-      >
-        {/* Modern split card design */}
-        <div className="w-full flex flex-col md:flex-row bg-zinc-900 rounded-2xl overflow-hidden shadow-xl">
-          {/* Image section - full width on mobile, 55% on desktop */}
-          <div className="w-full md:w-[55%] h-[250px] md:h-[400px] lg:h-[450px] relative overflow-hidden">
-            <motion.img
-              src={url}
-              alt={title}
-              className="w-full h-full object-cover"
-              initial={{ scale: 1 }}
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.4 }}
-            />
-
-            {/* Colored overlay on hover */}
-            <motion.div
-              className="absolute inset-0"
-              style={{ backgroundColor: color, mixBlendMode: "overlay" }}
-              initial={{ opacity: 0 }}
-              whileHover={{ opacity: 0.3 }}
-              transition={{ duration: 0.3 }}
-            />
-          </div>
-
-          {/* Content section - full width on mobile, 45% on desktop */}
-          <div className="w-full md:w-[45%] p-6 md:p-8 lg:p-10 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center gap-3 mb-4 md:mb-6">
-                <div
-                  className="w-2 h-2 md:w-3 md:h-3 rounded-full"
-                  style={{ backgroundColor: color }}
-                />
-                <div className="h-[1px] w-12 md:w-20 bg-gray-600" />
-              </div>
-
-              <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-white mb-2 md:mb-4">
-                {title}
-              </h2>
-              <p className="text-sm md:text-base text-gray-400 leading-relaxed line-clamp-3 md:line-clamp-none max-w-md">
-                {description}
-              </p>
-            </div>
-
-            {/* Technologies used */}
-            <div className="flex flex-wrap gap-2 mt-4 md:mt-6">
-              <span className="px-1 py-1 text-md rounded text-blue-300">
-                <span className="text-xl font-semibold text-white">Technologies: </span>{technologies}
-              </span>
-            </div>
-
-            <div className="mt-4 md:mt-auto pt-4">
-              <div className="w-full h-[1px] bg-gray-800 mb-4 md:mb-6" />
-
-              <div className="flex items-center gap-4">
-                {/* GitHub Link */}
-                <motion.a
-                  href={githubLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center gap-2"
-                  whileHover={{ y: -3 }}
-                  transition={{ type: "spring", stiffness: 400 }}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="22"
-                    height="22"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke={color}
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
-                  </svg>
-                  <span
-                    className="text-xs md:text-sm font-medium"
-                    style={{ color }}
-                  >
-                    Code
-                  </span>
-                </motion.a>
-
-                {/* Live Link */}
-                <motion.a
-                  href={liveLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center gap-2"
-                  whileHover={{ y: -3 }}
-                  transition={{ type: "spring", stiffness: 400 }}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="22"
-                    height="22"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke={color}
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="2" y1="12" x2="22" y2="12"></line>
-                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-                  </svg>
-                  <span
-                    className="text-xs md:text-sm font-medium"
-                    style={{ color }}
-                  >
-                    Live
-                  </span>
-                </motion.a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    </div>
-  );
-});
-
-// Add PropTypes validation
-Card.propTypes = {
-  i: PropTypes.number.isRequired,
-  title: PropTypes.string.isRequired,
-  description: PropTypes.string.isRequired,
-  url: PropTypes.string.isRequired,
-  color: PropTypes.string.isRequired,
-  progress: PropTypes.object.isRequired,
-  range: PropTypes.array.isRequired,
-  targetScale: PropTypes.number.isRequired,
-  technologies: PropTypes.arrayOf(PropTypes.string).isRequired,
-  githubLink: PropTypes.string.isRequired,
-  liveLink: PropTypes.string.isRequired
-};
-
-// Export memoized component
-export default memo(Projects);

@@ -4,22 +4,28 @@ module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["Geist", "ui-sans-serif", "system-ui", "sans-serif"],
+        mono: ["Geist Mono", "ui-monospace", "SFMono-Regular", "monospace"],
+        serif: ["Instrument Serif", "ui-serif", "Georgia", "serif"],
+      },
       animation: {
-        meteor: "meteor 5s linear infinite",
+        marquee: "marquee 45s linear infinite",
+        trace: "trace 3.2s ease-in-out infinite",
+        aurora: "aurora 18s ease-in-out infinite alternate",
       },
       keyframes: {
-        meteor: {
-          "0%": {
-            transform: "rotate(215deg) translateX(0)",
-            opacity: "1",
-          },
-          "70%": {
-            opacity: "1",
-          },
-          "100%": {
-            transform: "rotate(215deg) translateX(-500px)",
-            opacity: "0",
-          },
+        marquee: {
+          to: { transform: "translateX(-50%)" },
+        },
+        trace: {
+          "0%": { top: "0%", opacity: "0" },
+          "15%, 85%": { opacity: "1" },
+          "100%": { top: "100%", opacity: "0" },
+        },
+        aurora: {
+          "0%": { transform: "translate(0, 0) scale(1)" },
+          "100%": { transform: "translate(60px, -40px) scale(1.2)" },
         },
       },
       borderRadius: {

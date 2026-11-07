@@ -1,5 +1,24 @@
 import { useState } from "react";
-import { Send, Phone, MapPin, Mail } from "lucide-react";
+import { motion } from "framer-motion";
+import { ArrowUp, Github, Linkedin, Mail, MapPin, Phone, Send } from "lucide-react";
+import SectionHeader from "@/components/SectionHeader";
+import { fadeUp } from "@/lib/utils";
+import { EMAIL, GITHUB, LINKEDIN, PHONE } from "@/lib/profile";
+
+const channels = [
+  { icon: Mail, label: "Email", value: EMAIL, href: `mailto:${EMAIL}` },
+  { icon: Phone, label: "Phone", value: PHONE, href: `tel:${PHONE.replace(/[\s-]/g, "")}` },
+  { icon: Github, label: "GitHub", value: "github.com/FARDIN98", href: GITHUB },
+  { icon: Linkedin, label: "LinkedIn", value: "linkedin.com/in/fardin-ahmed", href: LINKEDIN },
+  { icon: MapPin, label: "Location", value: "Dhaka, Bangladesh" },
+];
+
+const fields = [
+  { name: "name", label: "Name", type: "text", autoComplete: "name" },
+  { name: "email", label: "Email", type: "email", autoComplete: "email" },
+  { name: "subject", label: "Subject", type: "text", wide: true },
+  { name: "message", label: "Message", textarea: true, wide: true },
+];
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -86,163 +105,111 @@ export default function Contact() {
     }
   };
 
+  const inputClass = (name) =>
+    `w-full rounded-xl border bg-white/[0.03] px-4 py-3 text-white placeholder:text-zinc-600 transition-colors focus:border-emerald-400/60 focus:outline-none ${
+      errors[name] ? "border-red-500/70" : "border-white/10"
+    }`;
+
   return (
-    <main
-      className="pt-20 lg:pt-[0rem] bg-[#04081A]
- text-white min-h-screen"
-    >
-      <section className="hero min-h-screen flex items-center relative px-4 sm:px-6 lg:px-8">
-        <div className="container mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Contact Info */}
-            <div className="space-y-8">
-              <div>
-                <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                  Get in Touch
-                </h2>
-                <p className="text-gray-300 text-lg">
-                  Have a question or want to work together? Drop me a message!
-                </p>
-              </div>
+    <section id="contact" className="relative isolate overflow-hidden pb-10 pt-24 md:pt-32">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute bottom-0 left-1/2 -z-10 h-[30rem] w-[60rem] -translate-x-1/2 translate-y-1/2 rounded-full bg-emerald-500/15 blur-[140px]"
+      />
 
-              <div className="space-y-6">
+      <div className="mx-auto grid max-w-6xl gap-14 px-4 sm:px-6 lg:grid-cols-2">
+        <div>
+          <SectionHeader
+            index="06"
+            label="Contact"
+            intro="Have a product to build, a role to fill or a backend problem to untangle? Drop me a message."
+          >
+            Let&apos;s build something that <em>ships.</em>
+          </SectionHeader>
 
-                <div className="flex items-center space-x-4">
-                  <div className="bg-purple-500/10 p-3 rounded-lg">
-                    <Phone className="w-6 h-6 text-purple-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Phone</h3>
-                    <p className="text-gray-400">+8801533989026</p>
-                  </div>
+          <motion.ul {...fadeUp(0.1)} className="mt-10 space-y-4">
+            {channels.map(({ icon: Icon, label, value, href }) => (
+              <li key={label} className="flex items-center gap-4">
+                <span className="grid size-11 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/[0.03] text-emerald-300">
+                  <Icon aria-hidden className="size-5" />
+                </span>
+                <div className="min-w-0">
+                  <p className="font-mono text-xs text-zinc-500">{label}</p>
+                  {href ? (
+                    <a
+                      href={href}
+                      target={href.startsWith("http") ? "_blank" : undefined}
+                      rel="noopener noreferrer"
+                      className="break-all text-white transition-colors hover:text-emerald-300"
+                    >
+                      {value}
+                    </a>
+                  ) : (
+                    <p className="text-white">{value}</p>
+                  )}
                 </div>
-
-                <div className="flex items-center space-x-4">
-                  <div className="bg-purple-500/10 p-3 rounded-lg">
-                    <Mail className="w-6 h-6 text-purple-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Email</h3>
-                    <p className="text-gray-400">fardinahmed66@gmail.com</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-4">
-                  <div className="bg-pink-500/10 p-3 rounded-lg">
-                    <MapPin className="w-6 h-6 text-pink-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Location</h3>
-                    <p className="text-gray-400">Bashabo, Dhaka-1214</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Contact Form */}
-            <div className="backdrop-blur-lg bg-white/5 p-8 rounded-2xl shadow-xl">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 gap-6">
-                  <div>
-                    <input
-                      type="text"
-                      placeholder="Your Name"
-                      className={`w-full px-4 py-3 rounded-lg bg-white/5 border ${
-                        errors.name ? "border-red-500" : "border-gray-700"
-                      } focus:border-blue-500 focus:outline-none transition-colors`}
-                      value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
-                    />
-                    {errors.name && (
-                      <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <input
-                      type="email"
-                      placeholder="Your Email"
-                      className={`w-full px-4 py-3 rounded-lg bg-white/5 border ${
-                        errors.email ? "border-red-500" : "border-gray-700"
-                      } focus:border-blue-500 focus:outline-none transition-colors`}
-                      value={formData.email}
-                      onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
-                    />
-                    {errors.email && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {errors.email}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <input
-                      type="text"
-                      placeholder="Subject"
-                      className={`w-full px-4 py-3 rounded-lg bg-white/5 border ${
-                        errors.subject ? "border-red-500" : "border-gray-700"
-                      } focus:border-blue-500 focus:outline-none transition-colors`}
-                      value={formData.subject}
-                      onChange={(e) =>
-                        setFormData({ ...formData, subject: e.target.value })
-                      }
-                    />
-                    {errors.subject && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {errors.subject}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <textarea
-                      placeholder="Your Message"
-                      rows="4"
-                      className={`w-full px-4 py-3 rounded-lg bg-white/5 border ${
-                        errors.message ? "border-red-500" : "border-gray-700"
-                      } focus:border-blue-500 focus:outline-none transition-colors resize-none`}
-                      value={formData.message}
-                      onChange={(e) =>
-                        setFormData({ ...formData, message: e.target.value })
-                      }
-                    ></textarea>
-                    {errors.message && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {errors.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-3 px-6 rounded-lg font-semibold flex items-center justify-center space-x-2 hover:opacity-90 transition-opacity"
-                >
-                  <span>Send Message</span>
-                  <Send className="w-4 h-4" />
-                </button>
-              </form>
-
-              {/* Status Message */}
-              {status && (
-                <div
-                  className={`mt-4 text-center ${
-                    status.includes("success")
-                      ? "text-green-400"
-                      : "text-red-400"
-                  }`}
-                >
-                  <p>{status}</p>
-                </div>
-              )}
-            </div>
-          </div>
+              </li>
+            ))}
+          </motion.ul>
         </div>
-      </section>
-    </main>
+
+        <motion.form
+          {...fadeUp(0.15)}
+          onSubmit={handleSubmit}
+          noValidate
+          className="panel grid gap-5 self-start p-6 sm:grid-cols-2 md:p-8"
+        >
+          {fields.map(({ name, label, type, autoComplete, textarea, wide }) => {
+            const props = {
+              id: name,
+              name,
+              autoComplete,
+              value: formData[name],
+              onChange: (e) => setFormData({ ...formData, [name]: e.target.value }),
+              "aria-invalid": Boolean(errors[name]),
+              "aria-describedby": errors[name] ? `${name}-error` : undefined,
+              className: `${inputClass(name)}${textarea ? " resize-none" : ""}`,
+            };
+            return (
+              <div key={name} className={wide ? "sm:col-span-2" : undefined}>
+                <label htmlFor={name} className="mb-2 block font-mono text-xs text-zinc-400">
+                  {label}
+                </label>
+                {textarea ? <textarea rows={5} {...props} /> : <input type={type} {...props} />}
+                {errors[name] && (
+                  <p id={`${name}-error`} className="mt-1.5 text-sm text-red-400">
+                    {errors[name]}
+                  </p>
+                )}
+              </div>
+            );
+          })}
+
+          <button
+            type="submit"
+            className="group inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 font-medium text-zinc-950 transition-colors hover:bg-emerald-200 sm:col-span-2"
+          >
+            Send message
+            <Send className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+          </button>
+
+          <p
+            role="status"
+            className={`text-center text-sm sm:col-span-2 ${
+              status?.includes("success") ? "text-emerald-300" : "text-red-400"
+            } ${status ? "" : "sr-only"}`}
+          >
+            {status}
+          </p>
+        </motion.form>
+      </div>
+
+      <footer className="mx-auto mt-28 flex max-w-6xl flex-col items-center justify-between gap-4 border-t border-white/10 px-4 pt-8 text-sm text-zinc-500 sm:flex-row sm:px-6">
+        <p>© {new Date().getFullYear()} Fardin Ehsan Ahamad</p>
+        <a href="#home" className="inline-flex items-center gap-1.5 transition-colors hover:text-white">
+          Back to top <ArrowUp className="size-4" />
+        </a>
+      </footer>
+    </section>
   );
 }
